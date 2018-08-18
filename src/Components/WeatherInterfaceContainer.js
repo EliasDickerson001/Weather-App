@@ -15,7 +15,7 @@ export class WeatherInterfaceContainer extends React.Component {
     }
     getCurrWeatherData(event){
         event.preventDefault();
-        let apiKey = "5dc1a6d0183b60c9deeb6b1830b72d84";
+        let apiKey = "***";
         let requestUrl = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.currCity}&units=imperial&APPID=${apiKey}`;
         fetch(requestUrl).then(response => response.json())
         .then(json => {
