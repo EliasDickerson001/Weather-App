@@ -7,6 +7,6 @@ make it aesthetically pleasing.
 Functionality allows for the user to search for current weather based on city. Weather stats include 
 temperature (high,low), humidity, wind, and overall weather (rainy, cloudy, etc..).
 
-I will next be adding forecasted weather in addition to current weather. Then the plan is to dress everything up with styles.
+Forecast weather data retrieval and aggregation has been added. Forecasted weather will be represented by a DailyWeatherStats object. Next, the plan is to display the forecast data, then dress everything up with styles.
 
-I will update this README as features are added.
+I will update this README as features/styles are added.
