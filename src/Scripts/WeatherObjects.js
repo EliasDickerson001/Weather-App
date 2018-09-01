@@ -51,7 +51,10 @@ export class DailyWeatherStats{
         return position;
     }
     //Retrieves most prominent weather category for given day of 5 day forecast.
-    getProminentWeather(day){
+    //Returns array, even if only 1 prominent category. Occasionally will be 2 categories with equal forecast.
+    getProminentWeather(){
+        let date = new Date(this._forecast[0].dt*1000);
+        let day = DailyWeatherStats.getForecastPosition(date);
         let weatherCategories = {};
         let catArray;
         this._forecast.forEach((foreCastItem) => {
@@ -107,6 +110,8 @@ export class DailyWeatherStats{
                 return "Friday";
             case 6:
                 return "Saturday";
+            default:
+                break;
         }
     }
 }

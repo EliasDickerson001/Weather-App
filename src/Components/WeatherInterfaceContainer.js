@@ -1,76 +1,96 @@
 import React from 'react';
 import {SearchForm} from './SearchForm';
-import {WeatherStats} from './WeatherStats';
+import {CurrWeatherCard} from './CurrWeatherCard';
 import {DailyWeatherStats} from '../Scripts/WeatherObjects';
+import {ForecastContainer} from './ForecastContainer';
 
 export class WeatherInterfaceContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            location: "",
             currCity: "",
-            weather: "",
+            currWeather: {},
+            foreWeather: [],
             iconUrl : ""
         }
-        this.getCurrWeatherData = this.getCurrWeatherData.bind(this);
+        this.getWeatherData = this.getWeatherData.bind(this);
         this.onInputChange = this.onInputChange.bind(this);
+        this.aggregateCurrentData = this.aggregateCurrentData.bind(this);
         this.aggregateForecastData = this.aggregateForecastData.bind(this);
+        this.buildRequestURL = this.buildRequestURL.bind(this);
     }
-    getCurrWeatherData(event){
-        event.preventDefault();
-        // To use application, obtain API key from OpenWeatherMap 
-        let apiKey = "5dc1a6d0183b60c9deeb6b1830b72d84";
-        //Fetch data for current city weather 
-        let requestUrl = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.currCity}&units=imperial&APPID=${apiKey}`;
-        fetch(requestUrl).then(response => response.json())
-        .then(json => {
-            console.log("Current JSON");
-            console.log(json);
-            //If code starts with 4, give alert
-            if (json.cod[0] === "4"){
-                window.alert("City not found!");
-                this.props.updateCity("", "");
-                this.setState({
-                    weather: "",
-                    iconUrl: ""
-                });
-                return
-            };
-            let weatherStats = {
-                curr: Math.round(json.main.temp),
-                low: Math.round(json.main.temp_min),
-                high: Math.round(json.main.temp_max),
-                humidity: Math.round(json.main.humidity),
-                // Such as "Rain", "Clouds"
-                weathCategory: json.weather[0].main,
-                // Such as "Heavy Rain", "Broken Clouds"
-                weathCatDesc: json.weather[0].description,
-                windSpeed: json.wind.speed,
-                windDirection: json.wind.deg
-            };
+    componentDidMount(){
+        let success = (pos) => {
             this.setState({
-                weather: weatherStats,
-                iconUrl: `http://openweathermap.org/img/w/${json.weather[0].icon}.png`
+                location: pos.coords
             });
-            this.props.updateCity(json.name, json.sys.country);
-        }
-        ,networkError => {
+            this.getWeatherData(null, "coordinates");
+        };
+        navigator.geolocation.getCurrentPosition(success);
+        // let error = (err) => {
+            
+        // };
+         // navigator.geolocation.getCurrentPosition(success, error);
+    }
+    getWeatherData(event, locationMethod){
+        if (event) {event.preventDefault();}
+        // To use application, obtain API key from OpenWeatherMap 
+        //Fetch data for current city weather 
+        let requestUrl = locationMethod === "coordinates" ? this.buildRequestURL("coordinates", "current") : this.buildRequestURL("city", "current");
+        console.log(requestUrl);
+        fetch(requestUrl).then(response => response.json())
+        .then(json => this.aggregateCurrentData(json),
+        networkError => {
             console.log(networkError);
         });
         //Fetch data for forecasted city weather
-        requestUrl = `http://api.openweathermap.org/data/2.5/forecast?q=${this.state.currCity}&units=imperial&APPID=${apiKey}`;
+        requestUrl = locationMethod === "coordinates" ? this.buildRequestURL("coordinates", "forecast") : this.buildRequestURL("city", "forecast");
+        console.log(requestUrl);
         fetch(requestUrl).then(response => response.json())
-        .then(json => this.aggregateForecastData(json));
+            .then(json => this.aggregateForecastData(json),
+        networkError => {
+            console.log(networkError);
+        });
+    }
+    aggregateCurrentData(json){
+        console.log("Current JSON");
+        console.log(json);
+        //If code starts with 4, give alert
+        if (json.cod[0] === "4"){
+            window.alert("City not found!");
+            this.props.updateCity("", "");
+            this.setState({
+                currWeather: {},
+                iconUrl: ""
+            });
+            return
+        };
+        let weatherStats = {
+            curr: Math.round(json.main.temp),
+            humidity: Math.round(json.main.humidity),
+            // Such as "Rain", "Clouds"
+            weathCategory: json.weather[0].main,
+            // Such as "Heavy Rain", "Broken Clouds"
+            weathCatDesc: json.weather[0].description,
+            windSpeed: json.wind.speed,
+            windDirection: json.wind.deg
+        };
+        this.setState({
+            currWeather: weatherStats,
+            iconUrl: `http://openweathermap.org/img/w/${json.weather[0].icon}.png`
+        });
+        this.props.updateCity(json.name, json.sys.country);
     }
     aggregateForecastData(json){
         console.log("Forecast JSON");
         console.log(json);
         let forecastArray = json.list;
-        let forecastDayTime;
         // 5 day forecast provided, stats for every 3 hours, day0 is today
         let day0List = [], day1List = [], day2List = [], day3List = [], day4List = [], day5List = [];
         forecastArray.forEach(forecastItem => {
             // Date is Unix format returned in seconds, convert to miliseconds
-            forecastDayTime = new Date(forecastItem.dt*1000);
+            let forecastDayTime = new Date(forecastItem.dt*1000);
             let day = DailyWeatherStats.getForecastPosition(forecastDayTime);
             switch (day) {
                 case 0:
@@ -91,6 +111,8 @@ export class WeatherInterfaceContainer extends React.Component {
                 case 5:
                     day5List.push(forecastItem);  
                     break;
+                default:
+                    break;
             }
         });
         let day0 = day0List[0] ? new DailyWeatherStats(day0List) : null;
@@ -99,17 +121,48 @@ export class WeatherInterfaceContainer extends React.Component {
         let day3 = day3List[0] ? new DailyWeatherStats(day3List) : null;
         let day4 = day4List[0] ? new DailyWeatherStats(day4List) : null;
         let day5 = day5List[0] ? new DailyWeatherStats(day5List) : null;
+        //Provide day0 forecast data to currWeather state for display
+        let currWeather = this.state.currWeather;
+        currWeather.forecast = day0;
+        forecastArray = [day1, day2, day3, day4, day5];
+        this.setState({
+            currWeather: currWeather,
+            foreWeather: forecastArray
+
+        });
     }
     onInputChange(event){
         this.setState({
             currCity: event.target.value
         });
     }
+    buildRequestURL(locationMethod, when){
+        // To use application, obtain API key from OpenWeatherMap 
+        let apiKey = "***";
+        let currWeathCityUrl = `http://api.openweathermap.org/data/2.5/weather?q=${this.state.currCity}&units=imperial&APPID=${apiKey}`;
+        let foreWeathCityUrl = `http://api.openweathermap.org/data/2.5/forecast?q=${this.state.currCity}&units=imperial&APPID=${apiKey}`;
+        let currWeathCoordUrl = `http://api.openweathermap.org/data/2.5/weather?lat=${this.state.location.latitude}&lon=${this.state.location.longitude}&units=imperial&APPID=${apiKey}`;
+        let foreWeathCoordUrl = `http://api.openweathermap.org/data/2.5/forecast?lat=${this.state.location.latitude}&lon=${this.state.location.longitude}&units=imperial&APPID=${apiKey}`;
+        if (locationMethod === "city") {
+            if (when === "current") {
+                return currWeathCityUrl;
+            } else if (when === "forecast") {
+                return foreWeathCityUrl;
+            }
+        } else if (locationMethod === "coordinates"){
+            if (when === "current") {
+                return currWeathCoordUrl;
+            } else if (when === "forecast") {
+                return foreWeathCoordUrl;
+            }
+        }
+    }
     render(){
         return (
             <div>
-                <SearchForm onChange={this.onInputChange} onSearch={this.getCurrWeatherData}/>
-                <WeatherStats iconUrl={this.state.iconUrl} weather={this.state.weather}/>
+                <SearchForm onChange={this.onInputChange} onSearch={this.getWeatherData}/>
+                <CurrWeatherCard iconUrl={this.state.iconUrl} weather={this.state.currWeather}/>
+                <ForecastContainer forecast={this.state.foreWeather}/>
             </div>
         )    
     }
