@@ -10,11 +10,11 @@ export const ForecastCard = (props) => {
     let hiTemp = props.weather ? `High ${props.weather.getHighTemp()}°F` : null;
     // let rain = props.weather ? props.weather.chanceOfRain() : null;
     return (
-        <div>
-            <h3>{dayName}</h3>
-            <h4>{displayWeather}</h4>
-            <h5>{loTemp}</h5>
-            <h5>{hiTemp}</h5>
-        </div>
+        <ul id="foreWeatherMain" className="noBullets textCenter transition">
+            <li className="cardHeader topBorderRadius">{dayName}</li>
+            <li>{displayWeather}</li>
+            <li>{loTemp}</li>
+            <li>{hiTemp}</li>
+        </ul>
     )
 }

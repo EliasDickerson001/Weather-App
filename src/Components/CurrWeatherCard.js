@@ -1,18 +1,8 @@
 import React from 'react';
 import {Icon} from './Icon';
 import {Compass} from './Compass';
-let containerStyle = {
-    width: "30%",
-    margin: "auto",
-    boxShadow: "5px 5px 5px grey",
-    backgroundColor: "rgb(212, 225, 244)"
-}
-let halfSizeStyle = {
-    display: "inline-block",
-    width: "50%"
-}
-
 export const CurrWeatherCard = (props) => {
+    let today = props.weather.forecast ? `${props.weather.forecast.getDayOfWeek()}` : getDayOfWeek();
     let currTemp = props.weather.curr ? `${props.weather.curr}°F` : null;
     let hiTemp = null;
     if (props.weather.forecast) {
@@ -21,34 +11,53 @@ export const CurrWeatherCard = (props) => {
     let loTemp = null;
     if (props.weather.forecast) {
         loTemp = props.weather.forecast.getLowTemp() > props.weather.curr ? `Low ${props.weather.curr}°F`: `Low ${props.weather.forecast.getLowTemp()}°F`;
-    }
+    } 
     let humidity = props.weather.humidity ? `Humidity ${props.weather.humidity}%` : null;
     let category = props.weather.weathCategory ? `${props.weather.weathCategory}` : null;
     let catDescription = props.weather.weathCatDesc ? `${props.weather.weathCatDesc}` : null;
-    let windSpeed = props.weather.windSpeed ? `${props.weather.windSpeed}mph` : null;
+    let windSpeed = props.weather.windSpeed ? `${Math.round(props.weather.windSpeed)}mph` : null;
     let windDirection = props.weather.windDirection ? props.weather.windDirection : null;
     let windCompass = windDirection || windSpeed ? 
-    (<div style={halfSizeStyle}>
-            <h3><u>Wind</u></h3>
-            <Compass height={90} width={75} degree={windDirection?windDirection:0}/>
-            <h4>{windSpeed}</h4>
-        </div>)
+        (<ul>
+            <li><i>Wind</i></li>
+            <li><Compass height={140} width={115} degree={windDirection?windDirection:0}/></li>
+            <li>{windSpeed}</li>
+        </ul>)
         :null;
     return (
-        <div style={containerStyle}>
-            <div style={halfSizeStyle}>
-                <h2>{category}</h2>
-                <h4><i>{catDescription}</i></h4>
-                <Icon srcUrl={props.iconUrl}/>
-                <h1>{currTemp}</h1>
-                {/* TO DO: add keys to list */}
-                <ul style={{listStyleType:"none"}}>
-                    <li>{loTemp}</li>
-                    <li>{hiTemp}</li>
-                    <li>{humidity}</li>
-                </ul>
-            </div>
+        <div id="currWeatherMain" className="transition">
+            <h1 className="cardHeader textCenter topBorderRadius">{today}</h1>
+            <ul>
+                <li>{category} <br/> {catDescription}</li>
+                <li><Icon srcUrl={props.iconUrl}/></li>
+                <li>{currTemp}</li>
+                <li>{loTemp}</li>
+                <li>{hiTemp}</li>
+                <li>{humidity}</li>
+            </ul>
             {windCompass}
         </div>
     )
 }
+let getDayOfWeek = () => {
+    let date = new Date();
+    let dayVal = date.getDay();
+    switch (dayVal) {
+        case 0:
+            return "Sunday";
+        case 1:    
+            return "Monday";
+        case 2:
+            return "Tuesday";
+        case 3:
+            return "Wednesday";
+        case 4:
+            return "Thursday";
+        case 5:    
+            return "Friday";
+        case 6:
+            return "Saturday";
+        default:
+            break;
+    }
+};

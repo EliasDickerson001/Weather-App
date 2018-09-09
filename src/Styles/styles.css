@@ -1,0 +1,89 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.currWeatherCard{
+    margin: 10px auto 10px auto;
+    box-sizing: border-box;
+    max-width: 350px;
+    width: 100%;
+    height: auto;
+    background-color: rgb(212, 225, 244);
+    box-shadow: 5px 5px 5px grey;
+    border-radius: 7px;
+}
+    .currWeatherCard ul{
+        box-sizing: border-box;
+        vertical-align: top;
+        text-align: center;
+        list-style-type: none;
+        display: inline-block;
+        width: 50%;
+        height: auto;
+    }
+    .currWeatherCard:hover{
+        box-shadow: 5px 5px 5px rgb(63, 62, 62);
+        max-width: 360px;
+    }
+    .currWeatherCard:hover > #currWeatherMain{
+        padding-bottom: 10px;
+    }
+.foreWeatherCard{
+    vertical-align: top;
+    display: inline-block;
+    width: 18%;
+    margin: 5px;
+    box-shadow: 5px 5px 5px grey;
+    background-color: rgb(212, 225, 244);
+    border-radius: 7px;
+}
+    .foreWeatherCard:hover{
+        width: 19%;
+        /* padding-bottom: 5px; */
+        box-shadow: 5px 5px 5px rgb(63, 62, 62);
+    }
+    .foreWeatherCard:hover #foreWeatherMain{
+        padding-bottom: 5px;
+    }
+.forecastList ul{
+    width: 100%;
+}
+    .forecastList li{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 50%;
+        transform: translateX(-50%);
+        border-bottom: 2px dotted rgb(124,147,181);
+    }
+    .forecastList #arrowIndicator{
+        background-color: rgb(124,147,181);
+    }
+        .forecastList #arrowIndicator img{
+            width: 10%;
+            height: auto;
+            padding-top: 6px;
+            padding-bottom: 1px;
+        }
+.cardHeader{
+    font-size: 25px;
+    background-color: rgb(124,147,181);
+}
+.topBorderRadius{
+    border-radius: 7px 7px 0px 0px
+}
+.botBorderRadius{
+    border-radius: 0px 0px 7px 7px
+}
+.textCenter{
+    text-align: center;
+}
+.spacer{
+    padding-right: 17%;
+}
+.transition{
+    transition: .3s;
+}
+.noBullets{
+    list-style-type: none;
+}

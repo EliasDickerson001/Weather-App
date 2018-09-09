@@ -1,31 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {ForecastCard} from './ForecastCard';
-let listStyle = {
-    listStyleType:"none",
-    display:"inline-block",
-    width:"90%",
-    margin:"auto"
-};
-let listItemStyle = {
-    display:"inline-block", 
-    width:"18%", 
-    margin:"5px",
-    boxShadow: "5px 5px 5px grey"
-};
+import {ExpandableForecastList} from "./ExpandableForecastList";
 export const ForecastContainer = (props) => {
     let forecast = null;
+    console.log(props.displayArray);
     if (props.forecast) {
-        forecast = props.forecast.map((day) => {
+        forecast = props.forecast.map((day, index) => {
             return day ? 
-                (<li key={day.getDayOfWeek()} style={listItemStyle}>
+                (<li onClick={props.listToggle.bind(this, index+1)} className="foreWeatherCard transition" key={day.getDayOfWeek()}>
                     <ForecastCard weather={day}/>
+                    <ExpandableForecastList display={props.displayArray[index]} forecast={day}/>
                 </li>)
                 : null;
         });
     }
     return (
-        <ul style={listStyle}>
+        <ul className="textCenter">
             {forecast}
         </ul>
     );

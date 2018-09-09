@@ -3,6 +3,13 @@ export class DailyWeatherStats{
     constructor(forecastArray){
         this._forecast = forecastArray;
     }
+    get forecastArray(){
+        if (this._forecast) {
+            return this._forecast;
+        } else {
+            return undefined;
+        }
+    }
     getHighTemp(){
         let temp;
         this._forecast.forEach((foreCastItem, index) => {

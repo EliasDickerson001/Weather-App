@@ -17,6 +17,7 @@ export class YouTubePlayer extends React.Component{
         return (
             <div>
                 <iframe 
+                    style={{marginLeft:"50%", transform:"translateX(-50%)"}}
                     title="Weather Video" 
                     width= {this.props.specs.width} 
                     height= {this.props.specs.height} 

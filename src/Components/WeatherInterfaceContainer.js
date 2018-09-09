@@ -1,9 +1,9 @@
 import React from 'react';
 import {SearchForm} from './SearchForm';
 import {CurrWeatherCard} from './CurrWeatherCard';
+import {ExpandableForecastList} from "./ExpandableForecastList";
 import {DailyWeatherStats} from '../Scripts/WeatherObjects';
 import {ForecastContainer} from './ForecastContainer';
-
 export class WeatherInterfaceContainer extends React.Component {
     constructor(props) {
         super(props);
@@ -12,6 +12,7 @@ export class WeatherInterfaceContainer extends React.Component {
             currCity: "",
             currWeather: {},
             foreWeather: [],
+            forecastDisplay: ["none","none","none","none","none","none"],
             iconUrl : ""
         }
         this.getWeatherData = this.getWeatherData.bind(this);
@@ -19,6 +20,7 @@ export class WeatherInterfaceContainer extends React.Component {
         this.aggregateCurrentData = this.aggregateCurrentData.bind(this);
         this.aggregateForecastData = this.aggregateForecastData.bind(this);
         this.buildRequestURL = this.buildRequestURL.bind(this);
+        this.toggleForecastList = this.toggleForecastList.bind(this);
     }
     componentDidMount(){
         let success = (pos) => {
@@ -38,7 +40,6 @@ export class WeatherInterfaceContainer extends React.Component {
         // To use application, obtain API key from OpenWeatherMap 
         //Fetch data for current city weather 
         let requestUrl = locationMethod === "coordinates" ? this.buildRequestURL("coordinates", "current") : this.buildRequestURL("city", "current");
-        console.log(requestUrl);
         fetch(requestUrl).then(response => response.json())
         .then(json => this.aggregateCurrentData(json),
         networkError => {
@@ -46,7 +47,6 @@ export class WeatherInterfaceContainer extends React.Component {
         });
         //Fetch data for forecasted city weather
         requestUrl = locationMethod === "coordinates" ? this.buildRequestURL("coordinates", "forecast") : this.buildRequestURL("city", "forecast");
-        console.log(requestUrl);
         fetch(requestUrl).then(response => response.json())
             .then(json => this.aggregateForecastData(json),
         networkError => {
@@ -76,6 +76,9 @@ export class WeatherInterfaceContainer extends React.Component {
             windSpeed: json.wind.speed,
             windDirection: json.wind.deg
         };
+        // Occasionally the forecast data will get returned before the current weather data, make sure 
+        // it is not lost if it exists.
+        weatherStats.forecast = this.state.currWeather.forecast ? this.state.currWeather.forecast : null;
         this.setState({
             currWeather: weatherStats,
             iconUrl: `http://openweathermap.org/img/w/${json.weather[0].icon}.png`
@@ -136,6 +139,17 @@ export class WeatherInterfaceContainer extends React.Component {
             currCity: event.target.value
         });
     }
+    toggleForecastList(day){
+        let displayArray = this.state.forecastDisplay;
+        if (displayArray[day] === "none") {
+            displayArray[day] = "initial";
+        } else {
+            displayArray[day] = "none";
+        }
+        this.setState({
+            forecastDisplay: displayArray
+        });
+    }
     buildRequestURL(locationMethod, when){
         // To use application, obtain API key from OpenWeatherMap 
         let apiKey = "***";
@@ -161,8 +175,11 @@ export class WeatherInterfaceContainer extends React.Component {
         return (
             <div>
                 <SearchForm onChange={this.onInputChange} onSearch={this.getWeatherData}/>
-                <CurrWeatherCard iconUrl={this.state.iconUrl} weather={this.state.currWeather}/>
-                <ForecastContainer forecast={this.state.foreWeather}/>
+                <div onClick={this.toggleForecastList.bind(this, 0)} className="currWeatherCard transition">
+                    <CurrWeatherCard iconUrl={this.state.iconUrl} weather={this.state.currWeather}/>
+                    <ExpandableForecastList display={this.state.forecastDisplay[0]} forecast={this.state.currWeather.forecast?this.state.currWeather.forecast:null}/>
+                </div>
+                <ForecastContainer displayArray={this.state.forecastDisplay.slice(1)} listToggle={this.toggleForecastList} forecast={this.state.foreWeather}/>
             </div>
         )    
     }

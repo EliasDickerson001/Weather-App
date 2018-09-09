@@ -1,5 +1,5 @@
 import React from 'react';
-import '../Styles/App.css';
+import '../Styles/styles.css';
 import {WeatherInterfaceContainer} from './WeatherInterfaceContainer';
 import {YouTubePlayer} from './YouTubePlayer';
 
