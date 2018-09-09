@@ -4,7 +4,6 @@ import {ForecastCard} from './ForecastCard';
 import {ExpandableForecastList} from "./ExpandableForecastList";
 export const ForecastContainer = (props) => {
     let forecast = null;
-    console.log(props.displayArray);
     if (props.forecast) {
         forecast = props.forecast.map((day, index) => {
             return day ? 
